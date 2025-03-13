@@ -89,36 +89,26 @@ contract ElytroDefaultValidator is IValidator {
     function _packSignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
         internal
         pure
-        returns (bytes32 packedHash)
+        returns (bytes32)
     {
-        if (signatureType == 0x0) {
-            packedHash = hash.toEthSignedMessageHash();
-        } else if (signatureType == 0x1) {
-            packedHash = keccak256(abi.encodePacked(hash, validationData)).toEthSignedMessageHash();
-        } else if (signatureType == 0x2) {
-            // passkey sign doesn't need toEthSignedMessageHash
-            packedHash = hash;
-        } else if (signatureType == 0x3) {
-            // passkey sign doesn't need toEthSignedMessageHash
-            packedHash = keccak256(abi.encodePacked(hash, validationData));
-        } else {
-            revert Errors.INVALID_SIGNTYPE();
-        }
+        return _packHash(hash, signatureType, validationData);
     }
 
     function _pack1271SignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
         internal
         pure
-        returns (bytes32 packedHash)
+        returns (bytes32)
     {
-        if (signatureType == 0x0) {
-            packedHash = hash;
-        } else if (signatureType == 0x1) {
-            packedHash = keccak256(abi.encodePacked(hash, validationData));
-        } else if (signatureType == 0x2) {
-            packedHash = hash;
-        } else if (signatureType == 0x3) {
-            packedHash = keccak256(abi.encodePacked(hash, validationData));
+        return _packHash(hash, signatureType, validationData);
+    }
+
+    function _packHash(bytes32 hash, uint8 signatureType, uint256 validationData) private pure returns (bytes32) {
+        if (signatureType == 0x0 || signatureType == 0x2) {
+            // For types 0x0 and 0x2, return hash as is, userOpHash can be generated using eth_signTypedData_v4, therefore no need to use toEthSignedMessageHash
+            return hash;
+        } else if (signatureType == 0x1 || signatureType == 0x3) {
+            // For types 0x1 and 0x3, return keccak256(abi.encodePacked(hash, validationData))
+            return keccak256(abi.encodePacked(hash, validationData));
         } else {
             revert Errors.INVALID_SIGNTYPE();
         }

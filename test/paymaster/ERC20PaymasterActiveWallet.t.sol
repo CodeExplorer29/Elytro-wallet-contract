@@ -130,7 +130,7 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         entryPoint.handleOps(ops, payable(ownerAddr));
     }
 
-    function testFail_ActiveWalletWithERC20PaymasterMoreOperation() public {
+    function test_RevertWhen_ActiveWalletWithERC20PaymasterMoreOperation() public {
         vm.warp(1685300000);
 
         Execution[] memory executions = new Execution[](2);
@@ -182,7 +182,7 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         userOperation.signature = signUserOp(userOperation, ownerKey, address(defaultValidator));
 
         ops[0] = userOperation;
-        vm.expectRevert("invalid operation");
+        vm.expectRevert();
         entryPoint.handleOps(ops, payable(ownerAddr));
     }
 }

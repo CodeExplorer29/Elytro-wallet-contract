@@ -102,7 +102,7 @@ contract ERC20Paymaster is BasePaymaster {
     {
         require(userOp.unpackVerificationGasLimit() > 45000, "Paymaster: gas too low for postOp");
 
-        address sender = userOp.getSender();
+        address sender = userOp.sender;
 
         // paymasterAndData: [paymaster, token, maxCost]
         // The length check prevents the user from add exceeding calldata, which could drain paymaster deposits in entrypoint
@@ -172,7 +172,7 @@ contract ERC20Paymaster is BasePaymaster {
         (address spender, uint256 amount) = _decodeApprove(executions[0].data);
         require(spender == address(this), "Paymaster: invalid spender");
         require(amount >= tokenRequiredPreFund, "Paymaster: not enough approve");
-        uint256 tokenBalance = IERC20Metadata(token).balanceOf(userOp.getSender());
+        uint256 tokenBalance = IERC20Metadata(token).balanceOf(userOp.sender);
         require(tokenBalance >= tokenRequiredPreFund, "Paymaster: not enough balance");
         // callGasLimit
         uint256 callGasLimit = executions.length * _SAFE_APPROVE_GAS_COST;

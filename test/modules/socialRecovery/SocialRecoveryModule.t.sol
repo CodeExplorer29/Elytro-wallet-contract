@@ -227,7 +227,7 @@ contract SocialRecoveryModuleTest is Test {
         returns (bytes memory signature)
     {
         bytes32 hash = elytroInstence.entryPoint().getUserOpHash(op);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash.toEthSignedMessageHash());
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash);
         bytes memory opSig;
         bytes memory signatureData = abi.encodePacked(r, s, v);
         uint8 signType = 0;

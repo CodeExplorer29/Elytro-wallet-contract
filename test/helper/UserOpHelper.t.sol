@@ -22,7 +22,7 @@ abstract contract UserOpHelper is Test {
         returns (bytes memory signature)
     {
         bytes32 hash = entryPoint.getUserOpHash(op);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash.toEthSignedMessageHash());
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash);
         bytes memory opSig;
         bytes memory signatureData = abi.encodePacked(r, s, v);
         uint8 signType = 0;
@@ -37,7 +37,7 @@ abstract contract UserOpHelper is Test {
         returns (bytes memory signature)
     {
         bytes32 hash = entryPoint.getUserOpHash(op);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash.toEthSignedMessageHash());
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash);
         bytes memory opSig;
         bytes memory signatureData = abi.encodePacked(r, s, v);
         uint8 signType = 0;
@@ -52,7 +52,7 @@ abstract contract UserOpHelper is Test {
         returns (bytes memory signature)
     {
         bytes32 hash = _entryPoint.getUserOpHash(op);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash.toEthSignedMessageHash());
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash);
         bytes memory opSig;
         bytes memory signatureData = abi.encodePacked(r, s, v);
         uint8 signType = 0;
@@ -69,7 +69,7 @@ abstract contract UserOpHelper is Test {
         bytes memory hookData
     ) public view returns (bytes memory signature) {
         bytes32 hash = _entryPoint.getUserOpHash(op);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash.toEthSignedMessageHash());
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash);
         bytes memory opSig;
         bytes memory signatureData = abi.encodePacked(r, s, v);
         uint8 signType = 0;
