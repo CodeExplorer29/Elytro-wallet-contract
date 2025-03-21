@@ -31,6 +31,7 @@ contract UpgradeModule is BaseModule, IUpgrade {
     }
 
     function upgrade(address wallet) external override {
+        require(sender() == wallet, "caller must be wallet");
         require(_inited[wallet] != 0, "not inited");
         require(_upgraded[wallet] == false, "already upgraded");
         IUpgradable(wallet).upgradeTo(newImplementation);

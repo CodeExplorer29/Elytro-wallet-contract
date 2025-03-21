@@ -53,6 +53,7 @@ contract UpgradeTest is Test {
         assembly {
             oldImplementation := _oldImplementation
         }
+        vm.prank(address(elytro));
         upgradeModule.upgrade(address(elytro));
 
         // test new implementation
