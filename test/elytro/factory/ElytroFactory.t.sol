@@ -40,6 +40,8 @@ contract ElytroFactoryTest is Test, UserOpHelper {
             "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, hooks
         );
         address walletAddress1 = elytroFactory.getWalletAddress(initializer, salt);
+        address senderCreator = address(entryPoint.senderCreator());
+        vm.prank(senderCreator);
         address walletAddress2 = elytroFactory.createWallet(initializer, salt);
         require(walletAddress1 == walletAddress2, "walletAddress1 != walletAddress2");
     }
@@ -55,9 +57,12 @@ contract ElytroFactoryTest is Test, UserOpHelper {
             "initialize(bytes32[],address,bytes[],bytes[])", owners, defaultCallbackHandler, modules, hooks
         );
         address walletAddress1 = elytroFactory.getWalletAddress(initializer, salt);
+        address senderCreator = address(entryPoint.senderCreator());
+        vm.startPrank(senderCreator);
         address walletAddress2 = elytroFactory.createWallet(initializer, salt);
         require(walletAddress1 == walletAddress2, "walletAddress1 != walletAddress2");
         address walletAddress3 = elytroFactory.createWallet(initializer, salt);
+        vm.stopPrank();
         require(walletAddress3 == walletAddress2, "walletAddress3 != walletAddress2");
     }
 }

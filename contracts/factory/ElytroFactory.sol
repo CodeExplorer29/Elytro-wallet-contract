@@ -7,7 +7,7 @@ pragma solidity ^0.8.20;
 
 import "../Elytro.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
-import {IEntryPoint} from "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import {IEntryPoint, ISenderCreator} from "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
@@ -19,6 +19,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ElytroFactory is Ownable {
     address public immutable _WALLETIMPL;
     IEntryPoint public immutable entryPoint;
+    ISenderCreator public immutable senderCreator;
     string public constant VERSION = "0.0.1";
 
     event ElytroCreation(address indexed proxy);
@@ -34,6 +35,7 @@ contract ElytroFactory is Ownable {
         _WALLETIMPL = _walletImpl;
         require(_entryPoint != address(0), "Invalid entry point address");
         entryPoint = IEntryPoint(_entryPoint);
+        senderCreator = entryPoint.senderCreator();
     }
 
     function _calcSalt(bytes memory _initializer, bytes32 _salt) private pure returns (bytes32 salt) {
@@ -47,6 +49,9 @@ contract ElytroFactory is Ownable {
      * @return proxy Address of the deployed proxy
      */
     function createWallet(bytes memory _initializer, bytes32 _salt) external returns (address proxy) {
+        // Prevent initCode front-run (AA-466)
+        // https://github.com/eth-infinitism/account-abstraction/releases/tag/v0.8.0
+        require(msg.sender == address(senderCreator), "only callable from SenderCreator");
         // factory expected to return the wallet address even if the wallet has already been created.
         address addr = getWalletAddress(_initializer, _salt);
         uint256 codeSize = addr.code.length;
