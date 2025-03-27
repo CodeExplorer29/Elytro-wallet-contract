@@ -130,7 +130,7 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         entryPoint.handleOps(ops, payable(ownerAddr));
     }
 
-    function test_RevertWhen_ActiveWalletWithERC20PaymasterMoreOperation() public {
+    function test_Revert_When_ActiveWalletWithERC20PaymasterMoreOperation() public {
         vm.warp(1685300000);
 
         Execution[] memory executions = new Execution[](2);
