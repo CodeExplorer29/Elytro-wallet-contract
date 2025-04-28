@@ -50,13 +50,11 @@ contract Elytro is
      * @notice Initializes the Elytro contract
      * @dev This function can only be called once. It sets the initial owners, default callback handler, modules, and hooks.
      */
-    function initialize(
-        bytes32[] calldata owners,
-        address defalutCallbackHandler,
-        bytes[] calldata modules,
-        bytes[] calldata hooks
-    ) external initializer {
-        _addOwners(owners);
+    function initialize(address defalutCallbackHandler, bytes[] calldata modules, bytes[] calldata hooks)
+        external
+        initializer
+    {
+        _addOwner(bytes32(uint256(uint160(address(this)))));
         _setFallbackHandler(defalutCallbackHandler);
         _installValidator(_DEFAULT_VALIDATOR, hex"");
         for (uint256 i = 0; i < modules.length;) {

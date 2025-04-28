@@ -2,42 +2,38 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "../base/ElytroInstence.sol";
 import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.sol";
+import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
 
 import "@source/libraries/TypeConversion.sol";
 import "@source/dev/tokens/TokenERC20.sol";
 import "@source/abstract/DefaultCallbackHandler.sol";
+import "@source/Elytro.sol";
 
 contract DeployDirectTest is Test {
+    // Alice's address and private key (EOA with no initial contract code).
+    address payable ALICE_ADDRESS = payable(0x70997970C51812dc3A010C7d01b50e0d17dc79C8);
+    uint256 constant ALICE_PK = 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d;
+
     using TypeConversion for address;
 
-    function setUp() public {}
+    Elytro elytro;
+    EntryPoint public entryPoint;
 
-    error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);
+    function setUp() public {
+        entryPoint = new EntryPoint();
+        elytro = new Elytro(address(entryPoint), address(new ElytroDefaultValidator()));
+    }
 
     function test_Deploy() public {
+        vm.signAndAttachDelegation(address(elytro), ALICE_PK);
+        bytes memory code = address(ALICE_ADDRESS).code;
+        require(code.length > 0, "no code written to Alice");
         bytes[] memory modules = new bytes[](0);
         bytes[] memory hooks = new bytes[](0);
-        bytes32 salt = bytes32(0);
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
-        bytes32[] memory owners = new bytes32[](1);
-        owners[0] = address(this).toBytes32();
-        ElytroInstence elytroInstence = new ElytroInstence(
-            address(defaultCallbackHandler), address(new ElytroDefaultValidator()), owners, modules, hooks, salt
-        );
-        IElytro elytro = elytroInstence.elytro();
-        assertEq(elytro.isOwner(address(this).toBytes32()), true);
-        assertEq(elytro.isOwner(address(0x1111).toBytes32()), false);
-
-        TokenERC20 token = new TokenERC20(18);
-
-        vm.startPrank(address(elytroInstence.entryPoint()));
-        // execute(address dest, uint256 value, bytes calldata func)
-        vm.expectRevert(
-            abi.encodeWithSelector(ERC20InsufficientBalance.selector, address(elytroInstence.elytro()), 0, 1)
-        );
-        elytro.execute(address(token), 0, abi.encodeWithSignature("transfer(address,uint256)", address(0x1), 1));
-        vm.stopPrank();
+        Elytro(ALICE_ADDRESS).initialize(address(defaultCallbackHandler), modules, hooks);
+        assertEq(Elytro(ALICE_ADDRESS).isOwner(address(ALICE_ADDRESS).toBytes32()), true);
+        assertEq(Elytro(ALICE_ADDRESS).isOwner(address(0x1111).toBytes32()), false);
     }
 }

@@ -50,7 +50,7 @@ contract CreateWalletEntryPoint is Script {
 
     function createWallet() private {
         vm.startBroadcast(walletSingerPrivateKey);
-        bytes32 salt = bytes32(uint256(3));
+        bytes32 salt = bytes32(uint256(4));
         bytes[] memory modules = new bytes[](0);
 
         bytes32[] memory owners = new bytes32[](1);
@@ -72,21 +72,21 @@ contract CreateWalletEntryPoint is Script {
         entryPoint.depositTo{value: 0.005 ether}(cacluatedAddress);
         PackedUserOperation[] memory ops = new PackedUserOperation[](1);
 
-        address aaveUsdcAutomationAddress = loadEnvContract("ELYTRO_AAVE_USDC_AUTOMATION_BASE_SEPOLIA");
-        bytes memory approveData =
-            abi.encodeWithSignature("approve(address,uint256)", aaveUsdcAutomationAddress, 10000 ether);
-        address usdcAddress = loadEnvContract("USDC_BASE");
+        // address aaveUsdcAutomationAddress = loadEnvContract("ELYTRO_AAVE_USDC_AUTOMATION_BASE_SEPOLIA");
+        // bytes memory approveData =
+        //     abi.encodeWithSignature("approve(address,uint256)", aaveUsdcAutomationAddress, 10000 ether);
+        // address usdcAddress = loadEnvContract("USDC_BASE");
 
         PackedUserOperation memory userOperation = UserOperationHelper.newUserOp({
             sender: cacluatedAddress,
             nonce: 0,
             initCode: initCode,
-            callData: abi.encodeWithSelector(IStandardExecutor.execute.selector, usdcAddress, 0, approveData),
-            callGasLimit: 900000,
-            verificationGasLimit: 1000000,
-            preVerificationGas: 300000,
-            maxFeePerGas: 10000,
-            maxPriorityFeePerGas: 10000,
+            callData: hex"",
+            callGasLimit: 2000000,
+            verificationGasLimit: 2000000,
+            preVerificationGas: 1000000,
+            maxFeePerGas: 100000,
+            maxPriorityFeePerGas: 100000,
             paymasterAndData: hex""
         });
         userOperation.signature = signUserOp(userOperation, walletSingerPrivateKey, elytroDefaultValidator);
@@ -94,7 +94,19 @@ contract CreateWalletEntryPoint is Script {
 
         ops[0] = userOperation;
 
-        entryPoint.handleOps(ops, payable(walletSigner));
+        // Explicitly set high gas limit for the handleOps call
+        uint256 gasLimit = 5000000; // 15 million gas
+        (bool success,) = address(entryPoint).call{gas: gasLimit}(
+            abi.encodeWithSelector(
+                entryPoint.handleOps.selector,
+                ops,
+                payable(walletSigner)
+            )
+        );
+        require(success, "handleOps failed");
+        
+        // Original call (commented out)
+        // entryPoint.handleOps(ops, payable(walletSigner));
     }
 
     function withDrawAndTransfer() private {
@@ -156,7 +168,7 @@ contract CreateWalletEntryPoint is Script {
         returns (bytes memory signature)
     {
         bytes32 hash = entryPoint.getUserOpHash(op);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash.toEthSignedMessageHash());
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_key, hash);
         bytes memory opSig;
         bytes memory signatureData = abi.encodePacked(r, s, v);
         uint8 signType = 0;
