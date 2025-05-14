@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {Authority} from "@soulwallet-core/contracts/base/Authority.sol";
+import {Authority} from "@ElytroWalletCore/contracts/base/Authority.sol";
 
 abstract contract ERC1271Handler is Authority {
     // Magic value indicating a valid signature for ERC-1271 contracts

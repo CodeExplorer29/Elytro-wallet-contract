@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
-import {IOwnerManager} from "@soulwallet-core/contracts/interface/IOwnerManager.sol";
+import {IOwnerManager} from "@ElytroWalletCore/contracts/interface/IOwnerManager.sol";
 
 interface IElytroOwnerManager is IOwnerManager {
     function addOwners(bytes32[] calldata owners) external;

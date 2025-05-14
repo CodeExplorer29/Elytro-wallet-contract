@@ -22,6 +22,6 @@
 	path = lib/account-abstraction
 	url = https://github.com/eth-infinitism/account-abstraction
 	branch = releases/v0.8
-[submodule "lib/soulwallet-core"]
-	path = lib/soulwallet-core
-	url = https://github.com/SoulWallet/soulwallet-core
+[submodule "lib/ElytroWalletCore"]
+	path = lib/ElytroWalletCore
+	url = https://github.com/Elytro-eth/ElytroWalletCore

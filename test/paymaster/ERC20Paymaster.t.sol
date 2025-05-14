@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.20;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
 
 import "forge-std/Test.sol";
 import "../elytro/base/ElytroInstence.sol";
@@ -14,9 +14,9 @@ import "../helper/UserOpHelper.t.sol";
 import {BytesLibTest} from "../helper/BytesLib.t.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {IStandardExecutor} from "@soulwallet-core/contracts/interface/IStandardExecutor.sol";
+import {IStandardExecutor} from "@ElytroWalletCore/contracts/interface/IStandardExecutor.sol";
 import "@source/libraries/TypeConversion.sol";
-import {UserOperationHelper} from "@soulwallet-core/test/dev/userOperationHelper.sol";
+import {UserOperationHelper} from "@ElytroWalletCore/test/dev/userOperationHelper.sol";
 
 contract ERC20PaymasterTest is Test, UserOpHelper {
     using ECDSA for bytes32;

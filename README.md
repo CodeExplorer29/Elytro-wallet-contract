@@ -105,7 +105,7 @@ To integrate a new hook, your contract should inherit `IHook` interface. This in
 
 ```solidity
 
-import {IHook} from "@soulwallet-core/contracts/interface/IHook.sol";
+import {IHook} from "@ElytroWalletCore/contracts/interface/IHook.sol";
 
 contract NewHook is IHook {
      function preIsValidSignatureHook(bytes32 hash, bytes calldata hookSignature) external view {

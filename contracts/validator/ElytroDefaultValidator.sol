@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.20;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
 
-import {IValidator} from "@soulwallet-core/contracts/interface/IValidator.sol";
-import {IOwnable} from "@soulwallet-core/contracts/interface/IOwnable.sol";
-import {PackedUserOperation} from "@soulwallet-core/contracts/interface/IHook.sol";
+import {IValidator} from "@ElytroWalletCore/contracts/interface/IValidator.sol";
+import {IOwnable} from "@ElytroWalletCore/contracts/interface/IOwnable.sol";
+import {PackedUserOperation} from "@ElytroWalletCore/contracts/interface/IHook.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
 import "./libraries/ValidatorSigDecoder.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";

@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.20;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
 
 import "./ElytroLogicInstence.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
-import {IHook, PackedUserOperation} from "@soulwallet-core/contracts/interface/IHook.sol";
+import {IHook, PackedUserOperation} from "@ElytroWalletCore/contracts/interface/IHook.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 

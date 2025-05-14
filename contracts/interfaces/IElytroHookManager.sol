@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
-import {IHookManager} from "@soulwallet-core/contracts/interface/IHookManager.sol";
+import {IHookManager} from "@ElytroWalletCore/contracts/interface/IHookManager.sol";
 
 interface IElytroHookManager is IHookManager {
     function installHook(bytes calldata hookAndData, uint8 capabilityFlags) external;

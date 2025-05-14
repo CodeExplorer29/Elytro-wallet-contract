@@ -2,7 +2,7 @@
 
 ## Overview
 
-The [soulwallet-core](https://github.com/Soulwallet/soulwallet-core) and [elytro-wallet-contract](https://github.com/SoulWallet/Elytro-wallet-contract) repositories are included in the Elytro Bug Bounty Program (the "Program") to encourage the responsible disclosure of vulnerabilities.
+The [ElytroWalletCore](https://github.com/Elytro-eth/ElytroWalletCore) and [elytro-wallet-contract](https://github.com/Elytro-eth/Elytro-wallet-contract) repositories are included in the Elytro Bug Bounty Program (the "Program") to encourage the responsible disclosure of vulnerabilities.
 
 The Program is focused exclusively on critical and high-severity bugs, with rewards of up to $50,000. Good luck and happy hunting!
 

@@ -4,8 +4,8 @@ import "forge-std/Test.sol";
 import "@source/modules/socialRecovery/SocialRecoveryModule.sol";
 import "../../elytro/base/ElytroInstence.sol";
 import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.sol";
-import {UserOperationHelper} from "@soulwallet-core/test/dev/userOperationHelper.sol";
-import {Execution} from "@soulwallet-core/contracts/interface/IStandardExecutor.sol";
+import {UserOperationHelper} from "@ElytroWalletCore/test/dev/userOperationHelper.sol";
+import {Execution} from "@ElytroWalletCore/contracts/interface/IStandardExecutor.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 contract SocialRecoveryModuleTest is Test {

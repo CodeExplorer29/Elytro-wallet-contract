@@ -1,4 +1,4 @@
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
 contract TestOracle {
     int256 public price;

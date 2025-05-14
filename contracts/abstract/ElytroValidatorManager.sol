@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
-import {ValidatorManager} from "@soulwallet-core/contracts/base/ValidatorManager.sol";
+import {ValidatorManager} from "@ElytroWalletCore/contracts/base/ValidatorManager.sol";
 import {IElytroValidatorManager} from "../interfaces/IElytroValidatorManager.sol";
 
 abstract contract ElytroValidatorManager is IElytroValidatorManager, ValidatorManager {

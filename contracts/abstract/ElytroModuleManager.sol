@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
-import {ModuleManager} from "@soulwallet-core/contracts/base/ModuleManager.sol";
+import {ModuleManager} from "@ElytroWalletCore/contracts/base/ModuleManager.sol";
 import {IElytroModuleManager} from "../interfaces/IElytroModuleManager.sol";
 import {IElytroModule} from "../modules/interfaces/IElytroModule.sol";
 import {Errors} from "../libraries/Errors.sol";

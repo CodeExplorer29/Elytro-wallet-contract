@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.20;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
 
 library DecodeCalldata {
     function decodeMethodId(bytes memory data) internal pure returns (bytes4 methodId) {
