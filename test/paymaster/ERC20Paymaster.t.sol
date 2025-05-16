@@ -55,11 +55,11 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = address(ownerAddr).toBytes32();
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
-        elytroDefaultValidator = new ElytroDefaultValidator();
         elytroInstence = new ElytroInstence(
-            address(defaultCallbackHandler), address(elytroDefaultValidator), owners, modules, hooks, salt
+            address(defaultCallbackHandler), owners, modules, hooks, salt
         );
         elytro = elytroInstence.elytro();
+        elytroDefaultValidator = elytroInstence.defaultValidator();
         entryPoint = elytroInstence.entryPoint();
 
         paymaster = new ERC20Paymaster(entryPoint, paymasterOwner, elytroInstence.elytroFactory.address);

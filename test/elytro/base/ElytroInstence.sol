@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import "./ElytroLogicInstence.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
+import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.sol";
 import "@source/factory/ElytroFactory.sol";
 import "@source/libraries/TypeConversion.sol";
 import "@source/interfaces/IElytro.sol";
@@ -15,16 +16,17 @@ contract ElytroInstence is Test {
     ElytroFactory public elytroFactory;
     EntryPoint public entryPoint;
     IElytro public elytro;
+    ElytroDefaultValidator public defaultValidator;
 
     constructor(
         address defaultCallbackHandler,
-        address defaultValidator,
         bytes32[] memory owners,
         bytes[] memory modules,
         bytes[] memory hooks,
         bytes32 salt
     ) {
         entryPoint = new EntryPoint();
+        defaultValidator = new ElytroDefaultValidator(address(entryPoint));
         elytroLogicInstence = new ElytroLogicInstence(address(entryPoint), address(defaultValidator));
 
         elytroFactory =

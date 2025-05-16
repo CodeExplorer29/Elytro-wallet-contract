@@ -51,7 +51,6 @@ contract SocialRecoveryModuleTest is Test {
                 address(socialRecoveryModule)
             )
         );
-        elytroDefaultValidator = new ElytroDefaultValidator();
     }
 
     function deployWallet() private {
@@ -72,7 +71,8 @@ contract SocialRecoveryModuleTest is Test {
         bytes memory socialRecoveryInitData = abi.encode(guardianHash, delayTime);
         modules[0] = abi.encodePacked(socialRecoveryModule, socialRecoveryInitData);
         bytes32 salt = bytes32(0);
-        elytroInstence = new ElytroInstence(address(0), address(elytroDefaultValidator), owners, modules, hooks, salt);
+        elytroInstence = new ElytroInstence(address(0), owners, modules, hooks, salt);
+        elytroDefaultValidator = elytroInstence.defaultValidator();
         elytro = elytroInstence.elytro();
         assertEq(elytro.isOwner(_owner.toBytes32()), true);
         assertEq(elytro.isOwner(_newOwner.toBytes32()), false);
@@ -96,7 +96,7 @@ contract SocialRecoveryModuleTest is Test {
         bytes memory socialRecoveryInitData = abi.encode(guardianHash, delayTime);
         modules[0] = abi.encodePacked(socialRecoveryModule, socialRecoveryInitData);
         bytes32 salt = bytes32(0);
-        elytroInstence = new ElytroInstence(address(0), address(elytroDefaultValidator), owners, modules, hooks, salt);
+        elytroInstence = new ElytroInstence(address(0), owners, modules, hooks, salt);
         elytro = elytroInstence.elytro();
         assertEq(elytro.isOwner(_owner.toBytes32()), true);
         assertEq(elytro.isOwner(_newOwner.toBytes32()), false);

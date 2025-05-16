@@ -3,10 +3,11 @@ pragma solidity ^0.8.28;
 
 import "forge-std/Test.sol";
 import "../base/ElytroInstence.sol";
-import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.sol";
+
 import "@source/libraries/TypeConversion.sol";
 import "@source/abstract/DefaultCallbackHandler.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
+import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
 
 contract DeployDirectTest is Test {
     using TypeConversion for address;
@@ -47,10 +48,11 @@ contract DeployDirectTest is Test {
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = walletOwner.toBytes32();
-        elytroDefaultValidator = new ElytroDefaultValidator();
+        EntryPoint entryPoint = new EntryPoint();
         elytroInstence = new ElytroInstence(
-            address(defaultCallbackHandler), address(elytroDefaultValidator), owners, modules, hooks, salt
+            address(defaultCallbackHandler),  owners, modules, hooks, salt
         );
+        elytroDefaultValidator = elytroInstence.defaultValidator();
         elytro = elytroInstence.elytro();
     }
 

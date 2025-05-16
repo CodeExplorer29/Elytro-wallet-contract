@@ -43,9 +43,11 @@ contract Crypto2FAHookTest is Test, UserOpHelper {
 
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = walletOwner.toBytes32();
-        elytroDefaultValidator = new ElytroDefaultValidator();
+        EntryPoint entryPoint = new EntryPoint();
+        elytroDefaultValidator = new ElytroDefaultValidator(address(entryPoint));
         bytes32 salt = bytes32(0);
-        elytroInstence = new ElytroInstence(address(0), address(elytroDefaultValidator), owners, modules, hooks, salt);
+        elytroInstence = new ElytroInstence(address(0), owners, modules, hooks, salt);
+        elytroDefaultValidator = elytroInstence.defaultValidator();
         elytro = elytroInstence.elytro();
         (address[] memory preIsValidSignatureHooks, address[] memory preUserOpValidationHooks) = elytro.listHook();
         assertEq(preIsValidSignatureHooks.length, 1, "preIsValidSignatureHooks length error");

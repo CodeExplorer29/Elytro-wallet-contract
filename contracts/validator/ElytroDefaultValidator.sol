@@ -2,8 +2,9 @@
 pragma solidity ^0.8.28;
 
 import {IValidator} from "@ElytroWalletCore/contracts/interface/IValidator.sol";
+import {PackedUserOperationWithValidatorData} from "../interfaces/IValidator.sol";
 import {IOwnable} from "@ElytroWalletCore/contracts/interface/IOwnable.sol";
-import {PackedUserOperation} from "@ElytroWalletCore/contracts/interface/IHook.sol";
+import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
 import "./libraries/ValidatorSigDecoder.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -25,10 +26,23 @@ contract ElytroDefaultValidator is IValidator {
     bytes4 internal constant INVALID_TIME_RANGE = 0xfffffffe;
     // Utility for Ethereum typed structured data hashing
 
+    // EIP-712 domain constants
+    string constant internal DOMAIN_NAME = "ERC4337";
+    string constant internal DOMAIN_VERSION = "1";
+    bytes32 private constant TYPE_HASH =
+        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
+
+      // EntryPoint contract address
+    address public immutable entryPoint;
+
     using MessageHashUtils for bytes32;
     using TypeConversion for address;
 
-    function validateUserOp(PackedUserOperation calldata, bytes32 userOpHash, bytes calldata validatorSignature)
+    constructor(address _entryPoint) {
+        entryPoint = _entryPoint;
+    }
+
+    function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, bytes calldata validatorSignature)
         external
         view
         override
@@ -38,7 +52,29 @@ contract ElytroDefaultValidator is IValidator {
         bytes calldata signature;
         (signatureType, validationData, signature) = ValidatorSigDecoder.decodeValidatorSignature(validatorSignature);
 
-        bytes32 hash = _packSignatureHash(userOpHash, signatureType, validationData);
+        bytes32 hash;
+        if (signatureType == 0x0 || signatureType == 0x2) {
+            // For types 0x0 and 0x2, use userOpHash directly
+            hash = userOpHash;
+        } else if (signatureType == 0x1 || signatureType == 0x3) {
+            // For types 0x1 and 0x3, create a new PackedUserOperationWithValidatorData
+            ValidationData memory _validationData = _parseValidationData(validationData);
+            PackedUserOperationWithValidatorData memory userOpWithValidatorData = PackedUserOperationWithValidatorData({
+                sender: userOp.sender,
+                nonce: userOp.nonce,
+                initCode: userOp.initCode,
+                callData: userOp.callData,
+                accountGasLimits: userOp.accountGasLimits,
+                preVerificationGas: userOp.preVerificationGas,
+                gasFees: userOp.gasFees,
+                paymasterAndData: userOp.paymasterAndData,
+                validUntil: _validationData.validUntil,
+                validAfter: _validationData.validAfter
+            });
+            // Get the typed data hash
+            hash = getTypedDataHash(userOpWithValidatorData);
+        }
+
         bytes32 recovered;
         bool success;
         (recovered, success) = recover(signatureType, hash, signature);
@@ -86,23 +122,12 @@ contract ElytroDefaultValidator is IValidator {
         return MAGICVALUE;
     }
 
-    function _packSignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
-        internal
-        pure
-        returns (bytes32)
-    {
-        return _packHash(hash, signatureType, validationData);
-    }
 
     function _pack1271SignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
         internal
         pure
         returns (bytes32)
     {
-        return _packHash(hash, signatureType, validationData);
-    }
-
-    function _packHash(bytes32 hash, uint8 signatureType, uint256 validationData) private pure returns (bytes32) {
         if (signatureType == 0x0 || signatureType == 0x2) {
             // For types 0x0 and 0x2, return hash as is, userOpHash can be generated using eth_signTypedData_v4, therefore no need to use toEthSignedMessageHash
             return hash;
@@ -113,6 +138,7 @@ contract ElytroDefaultValidator is IValidator {
             revert Errors.INVALID_SIGNTYPE();
         }
     }
+
 
     function _isOwner(bytes32 recovered) private view returns (bool isOwner) {
         return IOwnable(address(msg.sender)).isOwner(recovered);
@@ -153,4 +179,51 @@ contract ElytroDefaultValidator is IValidator {
     function Init(bytes calldata) external override {}
 
     function DeInit() external override {}
+
+    /**
+     * @dev Get the typed data hash for a PackedUserOperationWithValidatorData
+     * @param userOpWithValidatorData The user operation with validator data
+     * @return The typed data hash
+     */
+    function getTypedDataHash(PackedUserOperationWithValidatorData memory userOpWithValidatorData)
+        public
+        view
+        returns (bytes32)
+    {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                keccak256(
+                    "PackedUserOperationWithValidatorData(address sender,uint256 nonce,bytes initCode,bytes callData,bytes32 accountGasLimits,uint256 preVerificationGas,bytes32 gasFees,bytes paymasterAndData,uint48 validUntil,uint48 validAfter)"
+                ),
+                userOpWithValidatorData.sender,
+                userOpWithValidatorData.nonce,
+                keccak256(userOpWithValidatorData.initCode),
+                keccak256(userOpWithValidatorData.callData),
+                userOpWithValidatorData.accountGasLimits,
+                userOpWithValidatorData.preVerificationGas,
+                userOpWithValidatorData.gasFees,
+                keccak256(userOpWithValidatorData.paymasterAndData),
+                userOpWithValidatorData.validUntil,
+                userOpWithValidatorData.validAfter
+            )
+        );
+        bytes32 domainSeparator = _domainSeparatorV4();
+        return MessageHashUtils.toTypedDataHash(domainSeparator, structHash);
+    }
+
+    /**
+     * @dev Returns the domain separator for the current chain
+     */
+    function _domainSeparatorV4() internal view returns (bytes32) {
+        return _buildDomainSeparator();
+    }
+
+    /**
+     * @dev Builds the domain separator using ERC4337 domain parameters
+     */
+    function _buildDomainSeparator() private view returns (bytes32) {
+        bytes32 hashedName = keccak256(bytes(DOMAIN_NAME));
+        bytes32 hashedVersion = keccak256(bytes(DOMAIN_VERSION));
+        return keccak256(abi.encode(TYPE_HASH, hashedName, hashedVersion, block.chainid, entryPoint));
+    }
 }

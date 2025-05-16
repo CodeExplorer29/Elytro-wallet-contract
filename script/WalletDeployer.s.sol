@@ -24,7 +24,7 @@ contract WalletDeployer is Script, DeployHelper {
     }
 
     function deploy() private {
-        address elytroDefaultValidator = deploy("ElytroDefaultValidator", type(ElytroDefaultValidator).creationCode);
+        address elytroDefaultValidator = deploy("ElytroDefaultValidator",    bytes.concat(type(ElytroDefaultValidator).creationCode, abi.encode(ENTRYPOINT_ADDRESS)));
         writeAddressToEnv("ELYTRO_DEFAULT_VALIDATOR", elytroDefaultValidator);
         address elytroInstance = deploy(
             "ElytroInstance",

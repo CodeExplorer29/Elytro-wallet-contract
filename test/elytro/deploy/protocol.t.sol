@@ -23,7 +23,7 @@ contract DeployProtocolTest is Test, UserOpHelper {
 
     function setUp() public {
         entryPoint = new EntryPoint();
-        elytroDefaultValidator = new ElytroDefaultValidator();
+        elytroDefaultValidator = new ElytroDefaultValidator(address(entryPoint));
         elytroLogicInstence = new ElytroLogicInstence(address(entryPoint), address(elytroDefaultValidator));
         address logic = address(elytroLogicInstence.elytroLogic());
 

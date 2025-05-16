@@ -54,7 +54,7 @@ contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
         bundler = new Bundler();
 
         entryPoint = new EntryPoint();
-        defaultValidator = new ElytroDefaultValidator();
+        defaultValidator = new ElytroDefaultValidator(address(entryPoint));
         elytroLogicInstence = new ElytroLogicInstence(address(entryPoint), address(defaultValidator));
         address logic = address(elytroLogicInstence.elytroLogic());
         elytroFactory = new ElytroFactory(logic, address(entryPoint), address(this));

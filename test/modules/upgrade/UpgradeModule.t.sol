@@ -34,7 +34,7 @@ contract UpgradeTest is Test {
 
         bytes32 salt = bytes32(0);
         elytroInstence =
-            new ElytroInstence(address(0), address(new ElytroDefaultValidator()), owners, modules, hooks, salt);
+            new ElytroInstence(address(0),  owners, modules, hooks, salt);
         elytro = elytroInstence.elytro();
 
         (address[] memory _modules, bytes4[][] memory _selectors) = elytro.listModule();

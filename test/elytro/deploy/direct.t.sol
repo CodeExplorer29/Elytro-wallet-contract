@@ -24,7 +24,7 @@ contract DeployDirectTest is Test {
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = address(this).toBytes32();
         ElytroInstence elytroInstence = new ElytroInstence(
-            address(defaultCallbackHandler), address(new ElytroDefaultValidator()), owners, modules, hooks, salt
+            address(defaultCallbackHandler), owners, modules, hooks, salt
         );
         IElytro elytro = elytroInstence.elytro();
         assertEq(elytro.isOwner(address(this).toBytes32()), true);
