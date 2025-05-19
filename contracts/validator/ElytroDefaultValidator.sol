@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {IValidator} from "@ElytroWalletCore/contracts/interface/IValidator.sol";
-import {PackedUserOperationWithValidatorData} from "../interfaces/IValidator.sol";
+import {PackedUserOpWithValidTimeRange} from "./interfaces/PackedUserOpWithValidTimeRange.sol";
 import {IOwnable} from "@ElytroWalletCore/contracts/interface/IOwnable.sol";
 import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import "@account-abstraction/contracts/core/Helpers.sol";
@@ -12,34 +12,36 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {Errors} from "../libraries/Errors.sol";
 import {TypeConversion} from "../libraries/TypeConversion.sol";
 import {WebAuthn} from "../libraries/WebAuthn.sol";
+import {IEntryPoint_v08} from "./interfaces/IEntryPoint_v08.sol";
+import {UserOpWithValidTimeRangeLib} from "./libraries/UserOpWithValidTimeRangeLib.sol";
 
 /**
  * @title ElytroDefaultValidator
  * @dev A contract that implements the IValidator interface for validating user operations and signatures.
  */
 contract ElytroDefaultValidator is IValidator {
+    using MessageHashUtils for bytes32;
+    using TypeConversion for address;
+    using UserOpWithValidTimeRangeLib for PackedUserOpWithValidTimeRange;
+
     // Magic value indicating a valid signature for ERC-1271 contracts
     // bytes4(keccak256("isValidSignature(bytes32,bytes)")
     bytes4 internal constant MAGICVALUE = 0x1626ba7e;
     // Constants indicating different invalid states
     bytes4 internal constant INVALID_ID = 0xffffffff;
     bytes4 internal constant INVALID_TIME_RANGE = 0xfffffffe;
-    // Utility for Ethereum typed structured data hashing
 
-    // EIP-712 domain constants
-    string constant internal DOMAIN_NAME = "ERC4337";
-    string constant internal DOMAIN_VERSION = "1";
-    bytes32 private constant TYPE_HASH =
-        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
-
-      // EntryPoint contract address
+    // EntryPoint contract address
     address public immutable entryPoint;
-
-    using MessageHashUtils for bytes32;
-    using TypeConversion for address;
+    bytes32 private immutable _entryPointV08DomainSeparatorV4;
 
     constructor(address _entryPoint) {
         entryPoint = _entryPoint;
+        _entryPointV08DomainSeparatorV4 = IEntryPoint_v08(entryPoint).getDomainSeparatorV4();
+    }
+
+    function getDomainSeparatorV4() public view returns (bytes32) {
+        return _entryPointV08DomainSeparatorV4;
     }
 
     function validateUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, bytes calldata validatorSignature)
@@ -59,7 +61,7 @@ contract ElytroDefaultValidator is IValidator {
         } else if (signatureType == 0x1 || signatureType == 0x3) {
             // For types 0x1 and 0x3, create a new PackedUserOperationWithValidatorData
             ValidationData memory _validationData = _parseValidationData(validationData);
-            PackedUserOperationWithValidatorData memory userOpWithValidatorData = PackedUserOperationWithValidatorData({
+            PackedUserOpWithValidTimeRange memory userOpWithValidTimeRange = PackedUserOpWithValidTimeRange({
                 sender: userOp.sender,
                 nonce: userOp.nonce,
                 initCode: userOp.initCode,
@@ -72,7 +74,7 @@ contract ElytroDefaultValidator is IValidator {
                 validAfter: _validationData.validAfter
             });
             // Get the typed data hash
-            hash = getTypedDataHash(userOpWithValidatorData);
+            hash = getTypedDataHash(userOpWithValidTimeRange);
         }
 
         bytes32 recovered;
@@ -122,7 +124,6 @@ contract ElytroDefaultValidator is IValidator {
         return MAGICVALUE;
     }
 
-
     function _pack1271SignatureHash(bytes32 hash, uint8 signatureType, uint256 validationData)
         internal
         pure
@@ -138,7 +139,6 @@ contract ElytroDefaultValidator is IValidator {
             revert Errors.INVALID_SIGNTYPE();
         }
     }
-
 
     function _isOwner(bytes32 recovered) private view returns (bool isOwner) {
         return IOwnable(address(msg.sender)).isOwner(recovered);
@@ -181,49 +181,15 @@ contract ElytroDefaultValidator is IValidator {
     function DeInit() external override {}
 
     /**
-     * @dev Get the typed data hash for a PackedUserOperationWithValidatorData
-     * @param userOpWithValidatorData The user operation with validator data
+     * @dev Get the typed data hash for a PackedUserOpWithValidTimeRange
+     * @param userOpWithValidTimeRange The user operation with validator data
      * @return The typed data hash
      */
-    function getTypedDataHash(PackedUserOperationWithValidatorData memory userOpWithValidatorData)
+    function getTypedDataHash(PackedUserOpWithValidTimeRange memory userOpWithValidTimeRange)
         public
         view
         returns (bytes32)
     {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                keccak256(
-                    "PackedUserOperationWithValidatorData(address sender,uint256 nonce,bytes initCode,bytes callData,bytes32 accountGasLimits,uint256 preVerificationGas,bytes32 gasFees,bytes paymasterAndData,uint48 validUntil,uint48 validAfter)"
-                ),
-                userOpWithValidatorData.sender,
-                userOpWithValidatorData.nonce,
-                keccak256(userOpWithValidatorData.initCode),
-                keccak256(userOpWithValidatorData.callData),
-                userOpWithValidatorData.accountGasLimits,
-                userOpWithValidatorData.preVerificationGas,
-                userOpWithValidatorData.gasFees,
-                keccak256(userOpWithValidatorData.paymasterAndData),
-                userOpWithValidatorData.validUntil,
-                userOpWithValidatorData.validAfter
-            )
-        );
-        bytes32 domainSeparator = _domainSeparatorV4();
-        return MessageHashUtils.toTypedDataHash(domainSeparator, structHash);
-    }
-
-    /**
-     * @dev Returns the domain separator for the current chain
-     */
-    function _domainSeparatorV4() internal view returns (bytes32) {
-        return _buildDomainSeparator();
-    }
-
-    /**
-     * @dev Builds the domain separator using ERC4337 domain parameters
-     */
-    function _buildDomainSeparator() private view returns (bytes32) {
-        bytes32 hashedName = keccak256(bytes(DOMAIN_NAME));
-        bytes32 hashedVersion = keccak256(bytes(DOMAIN_VERSION));
-        return keccak256(abi.encode(TYPE_HASH, hashedName, hashedVersion, block.chainid, entryPoint));
+        return MessageHashUtils.toTypedDataHash(getDomainSeparatorV4(), userOpWithValidTimeRange.hash());
     }
 }

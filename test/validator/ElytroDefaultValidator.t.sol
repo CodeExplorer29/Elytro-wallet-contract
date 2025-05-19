@@ -12,7 +12,7 @@ import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.s
 import {P256} from "@openzeppelin/contracts/utils/cryptography/P256.sol";
 import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {SIG_VALIDATION_FAILED} from "@account-abstraction/contracts/core/Helpers.sol";
-import {PackedUserOperationWithValidatorData} from "@source/interfaces/IValidator.sol";
+import {PackedUserOpWithValidTimeRange} from "@source/validator/interfaces/PackedUserOpWithValidTimeRange.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
 
 contract ValidatorSigDecoderTest is Test {
@@ -51,9 +51,7 @@ contract ValidatorSigDecoderTest is Test {
         console.logBytes32(passkeyOwner);
         owners[1] = passkeyOwner;
 
-        elytroInstence = new ElytroInstence(
-            address(defaultCallbackHandler), owners, modules, hooks, salt
-        );
+        elytroInstence = new ElytroInstence(address(defaultCallbackHandler), owners, modules, hooks, salt);
         elytroDefaultValidator = elytroInstence.defaultValidator();
         elytro = elytroInstence.elytro();
         assertEq(elytro.isOwner(owner.toBytes32()), true);
@@ -210,6 +208,7 @@ contract ValidatorSigDecoderTest is Test {
         vm.stopPrank();
     }
     // Test for validateUserOp with signature type 1 (EOA signature with validation data)
+
     function test_ValidateUserOp_TypeB() public {
         // Create a mock user operation
         PackedUserOperation memory userOp = PackedUserOperation({
@@ -228,7 +227,7 @@ contract ValidatorSigDecoderTest is Test {
         uint48 validAfter = uint48(block.timestamp);
         uint256 validationData = (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48));
         // Create UserOperationWithValidatorData from regular UserOperation
-        PackedUserOperationWithValidatorData memory userOpWithValidatorData = PackedUserOperationWithValidatorData({
+        PackedUserOpWithValidTimeRange memory userOpWithValidTimeRange = PackedUserOpWithValidTimeRange({
             sender: userOp.sender,
             nonce: userOp.nonce,
             initCode: userOp.initCode,
@@ -241,7 +240,7 @@ contract ValidatorSigDecoderTest is Test {
             validAfter: validAfter
         });
         // Get typed data hash
-        bytes32 typedDataHash = elytroDefaultValidator.getTypedDataHash(userOpWithValidatorData);
+        bytes32 typedDataHash = elytroDefaultValidator.getTypedDataHash(userOpWithValidTimeRange);
         // Create signature
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerKey, typedDataHash);
         bytes memory sig = abi.encodePacked(r, s, v);
@@ -258,6 +257,7 @@ contract ValidatorSigDecoderTest is Test {
         vm.stopPrank();
     }
     // Test for validateUserOp with signature type 2 (WebAuthn signature without validation data)
+
     function test_ValidateUserOp_TypeC() public {
         // Create a mock user operation
         PackedUserOperation memory userOp = PackedUserOperation({
@@ -304,6 +304,7 @@ contract ValidatorSigDecoderTest is Test {
         vm.stopPrank();
     }
     // Test for invalid signatures
+
     function test_ValidateUserOp_InvalidSignature() public {
         // Create a mock user operation
         PackedUserOperation memory userOp = PackedUserOperation({

@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
  * @dev PackedUserOperation with validatorData field for typed data signing
  */
 
-struct PackedUserOperationWithValidatorData {
+struct PackedUserOpWithValidTimeRange {
     address sender;
     uint256 nonce;
     bytes initCode;
