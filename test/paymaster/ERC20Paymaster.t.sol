@@ -5,10 +5,10 @@ import "forge-std/Test.sol";
 import "../elytro/base/ElytroInstence.sol";
 import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.sol";
 import "@source/abstract/DefaultCallbackHandler.sol";
-import "@source/paymaster/ERC20Paymaster.sol";
-import "@source/dev/tokens/TokenERC20.sol";
-import "@source/dev/TestOracle.sol";
-import "@source/dev/HelloWorld.sol";
+import "../dev/paymaster/ERC20Paymaster.sol";
+import "../dev/tokens/TokenERC20.sol";
+import "../dev/TestOracle.sol";
+import "../dev/HelloWorld.sol";
 import "../helper/Bundler.t.sol";
 import "../helper/UserOpHelper.t.sol";
 import {BytesLibTest} from "../helper/BytesLib.t.sol";
@@ -55,9 +55,7 @@ contract ERC20PaymasterTest is Test, UserOpHelper {
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = address(ownerAddr).toBytes32();
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
-        elytroInstence = new ElytroInstence(
-            address(defaultCallbackHandler), owners, modules, hooks, salt
-        );
+        elytroInstence = new ElytroInstence(address(defaultCallbackHandler), owners, modules, hooks, salt);
         elytro = elytroInstence.elytro();
         elytroDefaultValidator = elytroInstence.defaultValidator();
         entryPoint = elytroInstence.entryPoint();

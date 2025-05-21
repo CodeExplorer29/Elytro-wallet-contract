@@ -9,7 +9,7 @@ import {ValidatorManager} from "@ElytroWalletCore/contracts/base/ValidatorManage
 import {SignatureDecoder} from "@ElytroWalletCore/contracts/utils/SignatureDecoder.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {Errors} from "./libraries/Errors.sol";
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "./abstract/ERC1271Handler.sol";
 import {ElytroOwnerManager} from "./abstract/ElytroOwnerManager.sol";
 import {ElytroModuleManager} from "./abstract/ElytroModuleManager.sol";

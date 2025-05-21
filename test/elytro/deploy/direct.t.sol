@@ -6,7 +6,7 @@ import "../base/ElytroInstence.sol";
 import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.sol";
 
 import "@source/libraries/TypeConversion.sol";
-import "@source/dev/tokens/TokenERC20.sol";
+import "../../dev/tokens/TokenERC20.sol";
 import "@source/abstract/DefaultCallbackHandler.sol";
 
 contract DeployDirectTest is Test {
@@ -23,9 +23,8 @@ contract DeployDirectTest is Test {
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = address(this).toBytes32();
-        ElytroInstence elytroInstence = new ElytroInstence(
-            address(defaultCallbackHandler), owners, modules, hooks, salt
-        );
+        ElytroInstence elytroInstence =
+            new ElytroInstence(address(defaultCallbackHandler), owners, modules, hooks, salt);
         IElytro elytro = elytroInstence.elytro();
         assertEq(elytro.isOwner(address(this).toBytes32()), true);
         assertEq(elytro.isOwner(address(0x1111).toBytes32()), false);

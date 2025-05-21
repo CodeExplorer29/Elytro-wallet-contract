@@ -48,10 +48,7 @@ contract DeployDirectTest is Test {
         DefaultCallbackHandler defaultCallbackHandler = new DefaultCallbackHandler();
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = walletOwner.toBytes32();
-        EntryPoint entryPoint = new EntryPoint();
-        elytroInstence = new ElytroInstence(
-            address(defaultCallbackHandler),  owners, modules, hooks, salt
-        );
+        elytroInstence = new ElytroInstence(address(defaultCallbackHandler), owners, modules, hooks, salt);
         elytroDefaultValidator = elytroInstence.defaultValidator();
         elytro = elytroInstence.elytro();
     }
