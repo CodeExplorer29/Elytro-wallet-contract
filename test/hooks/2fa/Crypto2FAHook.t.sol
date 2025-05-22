@@ -10,7 +10,7 @@ import {UserOpHelper} from "../../helper/UserOpHelper.t.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {Bundler} from "../../helper/Bundler.t.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {UserOperationHelper} from "@ElytroWalletCore/test/dev/userOperationHelper.sol";
+import {UserOperationHelper} from "@elytro-wallet-core/test/dev/userOperationHelper.sol";
 
 contract Crypto2FAHookTest is Test, UserOpHelper {
     using TypeConversion for address;

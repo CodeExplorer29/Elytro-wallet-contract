@@ -31,7 +31,7 @@ contract UpgradeModuleRegistryTest is Test {
         mockModule2 = new MockModule();
     }
 
-    function test_Constructor() public {
+    function test_Constructor() public view {
         assertEq(registry.owner(), owner);
         assertEq(registry.getVersionCount(), 0);
         assertEq(registry.latestVersion(), 0);
@@ -141,7 +141,7 @@ contract UpgradeModuleRegistryTest is Test {
         vm.stopPrank();
     }
 
-    function test_ZeroVersions() public {
+    function test_ZeroVersions() public view {
         assertEq(registry.getVersionCount(), 0);
         assertEq(registry.latestVersion(), 0);
         assertEq(registry.getLatestModuleAddress(), address(0));

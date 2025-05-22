@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IOracle.sol";
 import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
-import {Execution} from "@ElytroWalletCore/contracts/interface/IStandardExecutor.sol";
+import {Execution} from "@elytro-wallet-core/contracts/interface/IStandardExecutor.sol";
 
 struct TokenSetting {
     uint256 tokenDecimals;

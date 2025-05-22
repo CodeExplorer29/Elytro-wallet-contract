@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import "forge-std/Test.sol";
-import "@source/dev/ElytroInfoRecorder.sol";
+import "@source/tools/ElytroInfoRecorder.sol";
 
 contract ElytroInfoRecorderTest is Test {
     ElytroInfoRecorder public recorder;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {HookManager} from "@ElytroWalletCore/contracts/base/HookManager.sol";
+import {HookManager} from "@elytro-wallet-core/contracts/base/HookManager.sol";
 import {IElytroHookManager} from "../interfaces/IElytroHookManager.sol";
 
 abstract contract ElytroHookManager is IElytroHookManager, HookManager {

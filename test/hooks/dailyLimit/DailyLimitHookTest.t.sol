@@ -7,8 +7,8 @@ import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.s
 import {DailyERC20SpendingLimitHook} from "@source/hooks/spendLimit/DailyERC20SpendingLimitHook.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
 import {UserOpHelper} from "../../helper/UserOpHelper.t.sol";
-import {UserOperationHelper} from "@ElytroWalletCore/test/dev/userOperationHelper.sol";
-import "@source/dev/tokens/TokenERC20.sol";
+import {UserOperationHelper} from "@elytro-wallet-core/test/dev/userOperationHelper.sol";
+import "../../dev/tokens/TokenERC20.sol";
 
 contract DailyLimitHookTest is Test, UserOpHelper {
     using TypeConversion for address;
@@ -46,7 +46,7 @@ contract DailyLimitHookTest is Test, UserOpHelper {
         bytes32[] memory owners = new bytes32[](1);
         owners[0] = walletOwner.toBytes32();
         bytes32 salt = bytes32(0);
-        elytroInstence = new ElytroInstence(address(0),  owners, modules, hooks, salt);
+        elytroInstence = new ElytroInstence(address(0), owners, modules, hooks, salt);
         elytroDefaultValidator = elytroInstence.defaultValidator();
         elytro = elytroInstence.elytro();
         testEntryPoint = elytroInstence.entryPoint();

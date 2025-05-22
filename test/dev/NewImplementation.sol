@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.28;
 
-import "../abstract/ElytroUpgradeManager.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@source/abstract/ElytroUpgradeManager.sol";
+import "@openzeppelin/contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 
 contract NewImplementation is Initializable, ElytroUpgradeManager {
     address public immutable WALLETIMPL;

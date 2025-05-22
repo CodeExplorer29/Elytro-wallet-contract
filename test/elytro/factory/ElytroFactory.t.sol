@@ -8,7 +8,7 @@ import {ElytroFactory} from "@source/factory/ElytroFactory.sol";
 import "@source/libraries/TypeConversion.sol";
 import {ElytroLogicInstence} from "../base/ElytroLogicInstence.sol";
 import {UserOpHelper} from "../../helper/UserOpHelper.t.sol";
-import {UserOperationHelper} from "@ElytroWalletCore/test/dev/userOperationHelper.sol";
+import {UserOperationHelper} from "@elytro-wallet-core/test/dev/userOperationHelper.sol";
 import "@source/abstract/DefaultCallbackHandler.sol";
 
 contract ElytroFactoryTest is Test, UserOpHelper {

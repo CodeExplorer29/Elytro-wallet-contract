@@ -273,7 +273,7 @@ contract ValidatorSigDecoderTest is Test {
         });
         // In this case, we'll use the same WebAuthn signature from the previous test
         // but we need to get the proper userOpHash
-        bytes32 userOpHash = getUserOpHash(userOp);
+        // bytes32 userOpHash = getUserOpHash(userOp);
         // Use the same WebAuthn signature from the previous test
         bytes memory sig = hex"00" // algorithmType
             hex"12ade0dca831d36d3645590fac16d8270927b336e563af886da93bfdf14fa184" // r
@@ -321,7 +321,7 @@ contract ValidatorSigDecoderTest is Test {
         // Get the userOpHash using our helper function
         bytes32 userOpHash = getUserOpHash(userOp);
         // Create invalid signature (wrong signer)
-        (address wrongSigner, uint256 wrongKey) = makeAddrAndKey("wrongSigner");
+        (, uint256 wrongKey) = makeAddrAndKey("wrongSigner");
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(wrongKey, userOpHash);
         bytes memory sig = abi.encodePacked(r, s, v);
         // Create validator signature (type 0)

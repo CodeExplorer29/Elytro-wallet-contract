@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../../elytro/base/ElytroInstence.sol";
 import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.sol";
 import "@source/modules/upgrade/UpgradeModule.sol";
-import "@source/dev/NewImplementation.sol";
+import "../../dev/NewImplementation.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract UpgradeTest is Test {
@@ -33,8 +33,7 @@ contract UpgradeTest is Test {
         owners[0] = walletOwner.toBytes32();
 
         bytes32 salt = bytes32(0);
-        elytroInstence =
-            new ElytroInstence(address(0),  owners, modules, hooks, salt);
+        elytroInstence = new ElytroInstence(address(0), owners, modules, hooks, salt);
         elytro = elytroInstence.elytro();
 
         (address[] memory _modules, bytes4[][] memory _selectors) = elytro.listModule();

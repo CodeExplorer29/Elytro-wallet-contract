@@ -4,17 +4,17 @@ pragma solidity ^0.8.28;
 import "forge-std/Test.sol";
 import "../elytro/base/ElytroInstence.sol";
 import "@source/abstract/DefaultCallbackHandler.sol";
-import "@source/paymaster/ERC20Paymaster.sol";
-import "@source/dev/tokens/TokenERC20.sol";
-import "@source/dev/TestOracle.sol";
-import "@source/dev/HelloWorld.sol";
+import "../dev/paymaster/ERC20Paymaster.sol";
+import "../dev/tokens/TokenERC20.sol";
+import "../dev/TestOracle.sol";
+import "../dev/HelloWorld.sol";
 import "../helper/Bundler.t.sol";
 import "../helper/UserOpHelper.t.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/libraries/TypeConversion.sol";
 import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.sol";
-import {UserOperationHelper} from "@ElytroWalletCore/test/dev/userOperationHelper.sol";
+import {UserOperationHelper} from "@elytro-wallet-core/test/dev/userOperationHelper.sol";
 
 contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
     using ECDSA for bytes32;
