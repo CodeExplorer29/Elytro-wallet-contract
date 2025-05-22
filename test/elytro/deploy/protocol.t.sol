@@ -11,7 +11,7 @@ import "@source/libraries/TypeConversion.sol";
 import {ElytroLogicInstence} from "../base/ElytroLogicInstence.sol";
 import {UserOpHelper} from "../../helper/UserOpHelper.t.sol";
 import {Bundler} from "../../helper/Bundler.t.sol";
-import {UserOperationHelper} from "@ElytroWalletCore/test/dev/userOperationHelper.sol";
+import {UserOperationHelper} from "@elytro-wallet-core/test/dev/userOperationHelper.sol";
 
 contract DeployProtocolTest is Test, UserOpHelper {
     using TypeConversion for address;

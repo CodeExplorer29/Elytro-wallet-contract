@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {IAccount, PackedUserOperation} from "@ElytroWalletCore/contracts/interface/IAccount.sol";
-import {EntryPointManager} from "@ElytroWalletCore/contracts/base/EntryPointManager.sol";
-import {FallbackManager} from "@ElytroWalletCore/contracts/base/FallbackManager.sol";
-import {StandardExecutor} from "@ElytroWalletCore/contracts/base/StandardExecutor.sol";
-import {ValidatorManager} from "@ElytroWalletCore/contracts/base/ValidatorManager.sol";
-import {SignatureDecoder} from "@ElytroWalletCore/contracts/utils/SignatureDecoder.sol";
+import {IAccount, PackedUserOperation} from "@elytro-wallet-core/contracts/interface/IAccount.sol";
+import {EntryPointManager} from "@elytro-wallet-core/contracts/base/EntryPointManager.sol";
+import {FallbackManager} from "@elytro-wallet-core/contracts/base/FallbackManager.sol";
+import {StandardExecutor} from "@elytro-wallet-core/contracts/base/StandardExecutor.sol";
+import {ValidatorManager} from "@elytro-wallet-core/contracts/base/ValidatorManager.sol";
+import {SignatureDecoder} from "@elytro-wallet-core/contracts/utils/SignatureDecoder.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/contracts/proxy/utils/Initializable.sol";

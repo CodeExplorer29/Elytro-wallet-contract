@@ -1,4 +1,4 @@
-@ElytroWalletCore/=lib/ElytroWalletCore/
+@elytro-wallet-core/=lib/elytro-wallet-core/
 @source/=contracts/
 @solady=lib/solady/
 @solenv=lib/solenv/src/

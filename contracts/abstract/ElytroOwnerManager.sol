@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {OwnerManager} from "@ElytroWalletCore/contracts/base/OwnerManager.sol";
+import {OwnerManager} from "@elytro-wallet-core/contracts/base/OwnerManager.sol";
 import {IElytroOwnerManager} from "../interfaces/IElytroOwnerManager.sol";
 
 abstract contract ElytroOwnerManager is IElytroOwnerManager, OwnerManager {

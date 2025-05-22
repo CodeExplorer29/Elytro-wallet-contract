@@ -7,7 +7,7 @@ import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.s
 import {DailyERC20SpendingLimitHook} from "@source/hooks/spendLimit/DailyERC20SpendingLimitHook.sol";
 import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
 import {UserOpHelper} from "../../helper/UserOpHelper.t.sol";
-import {UserOperationHelper} from "@ElytroWalletCore/test/dev/userOperationHelper.sol";
+import {UserOperationHelper} from "@elytro-wallet-core/test/dev/userOperationHelper.sol";
 import "../../dev/tokens/TokenERC20.sol";
 
 contract DailyLimitHookTest is Test, UserOpHelper {

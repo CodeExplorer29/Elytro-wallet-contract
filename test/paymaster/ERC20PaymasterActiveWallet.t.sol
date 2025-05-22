@@ -14,7 +14,7 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@source/libraries/TypeConversion.sol";
 import {ElytroDefaultValidator} from "@source/validator/ElytroDefaultValidator.sol";
-import {UserOperationHelper} from "@ElytroWalletCore/test/dev/userOperationHelper.sol";
+import {UserOperationHelper} from "@elytro-wallet-core/test/dev/userOperationHelper.sol";
 
 contract ERC20PaymasterActiveWalletTest is Test, UserOpHelper {
     using ECDSA for bytes32;

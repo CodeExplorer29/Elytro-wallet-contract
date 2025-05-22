@@ -8,9 +8,9 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@source/libraries/TypeConversion.sol";
 import {Solenv} from "@solenv/Solenv.sol";
-import {UserOperationHelper} from "@ElytroWalletCore/test/dev/userOperationHelper.sol";
-import {IStandardExecutor} from "@ElytroWalletCore/contracts/interface/IStandardExecutor.sol";
-import {Execution} from "@ElytroWalletCore/contracts/interface/IStandardExecutor.sol";
+import {UserOperationHelper} from "@elytro-wallet-core/test/dev/userOperationHelper.sol";
+import {IStandardExecutor} from "@elytro-wallet-core/contracts/interface/IStandardExecutor.sol";
+import {Execution} from "@elytro-wallet-core/contracts/interface/IStandardExecutor.sol";
 
 contract CreateWalletEntryPoint is Script {
     using ECDSA for bytes32;

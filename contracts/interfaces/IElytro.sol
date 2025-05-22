@@ -6,7 +6,7 @@ import {IElytroModuleManager} from "../interfaces/IElytroModuleManager.sol";
 import {IElytroOwnerManager} from "../interfaces/IElytroOwnerManager.sol";
 import {IElytroOwnerManager} from "../interfaces/IElytroOwnerManager.sol";
 import {IUpgradable} from "../interfaces/IUpgradable.sol";
-import {IStandardExecutor} from "@ElytroWalletCore/contracts/interface/IStandardExecutor.sol";
+import {IStandardExecutor} from "@elytro-wallet-core/contracts/interface/IStandardExecutor.sol";
 
 interface IElytro is IElytroHookManager, IElytroModuleManager, IElytroOwnerManager, IStandardExecutor, IUpgradable {
     function initialize(
