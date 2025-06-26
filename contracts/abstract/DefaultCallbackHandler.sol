@@ -14,6 +14,8 @@ contract DefaultCallbackHandler is IERC721Receiver, IERC1155Receiver {
     bytes4 private constant _INTERFACE_ID_ERC1155_RECEIVER = type(IERC1155Receiver).interfaceId;
     bytes4 private constant _INTERFACE_ID_ERC165 = type(IERC165).interfaceId;
 
+    event ElytroETHReceived(address from, uint256 amount);
+
     function onERC721Received(address, address, uint256, bytes calldata) external pure override returns (bytes4) {
         return _ERC721_RECEIVED;
     }
@@ -41,7 +43,13 @@ contract DefaultCallbackHandler is IERC721Receiver, IERC1155Receiver {
             || interfaceId == _INTERFACE_ID_ERC165;
     }
 
-    receive() external payable {}
+    receive() external payable {
+        emit ElytroETHReceived(msg.sender, msg.value);
+    }
 
-    fallback() external payable {}
+    fallback() external payable {
+        if (msg.value > 0) {
+            emit ElytroETHReceived(msg.sender, msg.value);
+        }
+    }
 }
