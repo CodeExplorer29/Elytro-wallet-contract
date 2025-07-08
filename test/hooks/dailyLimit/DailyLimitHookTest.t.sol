@@ -614,4 +614,86 @@ contract DailyLimitHookTest is Test, UserOpHelper {
         vm.expectRevert();
         testEntryPoint.handleOps(ops, payable(walletOwner));
     }
+
+    function test_erc20IncreaseAllowanceEnforcesDailyLimit() public {
+        vm.deal(address(elytro), 1000 ether);
+        testLimitToken.sudoMint(address(elytro), 1000 ether);
+
+        _executeERC20Transaction(0.5 ether, false);
+
+        uint256 remaining = dailyLimitHook.getRemainingLimit(address(elytro), address(testLimitToken));
+        assertEq(remaining, 0.5 ether);
+
+        // Try to increaseAllowance by 2 ether (should fail, exceeds daily limit)
+        bytes memory callData = abi.encodeWithSelector(
+            IStandardExecutor.execute.selector,
+            address(testLimitToken),
+            0,
+            abi.encodeWithSelector(testLimitToken.increaseAllowance.selector, address(10), 2 ether)
+        );
+
+        PackedUserOperation memory userOperation = UserOperationHelper.newUserOp({
+            sender: address(elytro),
+            nonce: testEntryPoint.getNonce(address(elytro), 0),
+            initCode: "",
+            callData: callData,
+            callGasLimit: 900000,
+            verificationGasLimit: 1000000,
+            preVerificationGas: 300000,
+            maxFeePerGas: 100 gwei,
+            maxPriorityFeePerGas: 100 gwei,
+            paymasterAndData: ""
+        });
+
+        bytes memory hookAndData = returnDummyHookAndData();
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+        userOperation.signature = signUserOp(
+            testEntryPoint, userOperation, walletOwnerPrivateKey, address(elytroDefaultValidator), hookAndData
+        );
+        ops[0] = userOperation;
+
+        // Should revert due to daily limit enforcement
+        vm.expectRevert();
+        testEntryPoint.handleOps(ops, payable(walletOwner));
+    }
+
+    function test_erc20IncreaseAllowanceWithinLimit() public {
+        vm.deal(address(elytro), 1000 ether);
+        testLimitToken.sudoMint(address(elytro), 1000 ether);
+
+        // Try to increaseAllowance by 0.3 ether (should succeed, within daily limit)
+        bytes memory callData = abi.encodeWithSelector(
+            IStandardExecutor.execute.selector,
+            address(testLimitToken),
+            0,
+            abi.encodeWithSelector(testLimitToken.increaseAllowance.selector, address(10), 0.3 ether)
+        );
+
+        PackedUserOperation memory userOperation = UserOperationHelper.newUserOp({
+            sender: address(elytro),
+            nonce: testEntryPoint.getNonce(address(elytro), 0),
+            initCode: "",
+            callData: callData,
+            callGasLimit: 900000,
+            verificationGasLimit: 1000000,
+            preVerificationGas: 300000,
+            maxFeePerGas: 100 gwei,
+            maxPriorityFeePerGas: 100 gwei,
+            paymasterAndData: ""
+        });
+
+        bytes memory hookAndData = returnDummyHookAndData();
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+        userOperation.signature = signUserOp(
+            testEntryPoint, userOperation, walletOwnerPrivateKey, address(elytroDefaultValidator), hookAndData
+        );
+        ops[0] = userOperation;
+
+        // Should succeed as it's within the daily limit
+        testEntryPoint.handleOps(ops, payable(walletOwner));
+
+        // Verify that the remaining limit is reduced
+        uint256 remaining = dailyLimitHook.getRemainingLimit(address(elytro), address(testLimitToken));
+        assertEq(remaining, 0.7 ether, "Remaining limit should be reduced by 0.3 ether");
+    }
 }
