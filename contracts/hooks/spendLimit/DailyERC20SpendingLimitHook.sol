@@ -6,6 +6,17 @@ import {IStandardExecutor, Execution} from "@elytro-wallet-core/contracts/interf
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {console} from "forge-std/console.sol";
 
+/**
+ * @title DailyERC20SpendingLimitHook
+ * @dev Hook for enforcing daily spending limits on ERC20 tokens and ETH.
+ *
+ * Supported operations:
+ * - ETH transfers
+ * - ERC20 transfer, transferFrom, approve, increaseAllowance
+ *
+ * Limitations: Token-specific functions (permit, transferWithAuthorization, etc.)
+ * are not supported and may bypass limits.
+ */
 contract DailyERC20SpendingLimitHook is IHook {
     uint256 public constant TIME_LOCK_DURATION = 1 days;
     uint256 private constant ONE_DAY = 1 days;
@@ -94,6 +105,19 @@ contract DailyERC20SpendingLimitHook is IHook {
         }
     }
 
+    /**
+     * @dev Decodes spending operations from user operation data.
+     *
+     * Currently supported spending functions:
+     * 1. ETH transfers (when value > 0)
+     * 2. ERC20 transfer(address to, uint256 amount)
+     * 3. ERC20 approve(address spender, uint256 amount)
+     * 4. ERC20 increaseAllowance(address spender, uint256 addedValue)
+     * 5. ERC20 transferFrom(address from, address to, uint256 amount)
+     *
+     * Note: Other token-specific functions (e.g., permit, transferWithAuthorization, etc.)
+     * are not supported and may bypass spending limits.
+     */
     function _decodeSpent(address target, uint256 value, bytes memory data)
         private
         view
