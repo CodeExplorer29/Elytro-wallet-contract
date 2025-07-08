@@ -9,6 +9,8 @@ import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
 import {UserOpHelper} from "../../helper/UserOpHelper.t.sol";
 import {UserOperationHelper} from "@elytro-wallet-core/test/dev/userOperationHelper.sol";
 import "../../dev/tokens/TokenERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IStandardExecutor} from "@elytro-wallet-core/contracts/interface/IStandardExecutor.sol";
 
 contract DailyLimitHookTest is Test, UserOpHelper {
     using TypeConversion for address;
@@ -567,6 +569,48 @@ contract DailyLimitHookTest is Test, UserOpHelper {
         ops[0].signature = signUserOp(
             testEntryPoint, userOperation, walletOwnerPrivateKey, address(elytroDefaultValidator), hookAndData
         );
+        vm.expectRevert();
+        testEntryPoint.handleOps(ops, payable(walletOwner));
+    }
+
+    function test_erc20ApproveEnforcesDailyLimit() public {
+        vm.deal(address(elytro), 1000 ether);
+        testLimitToken.sudoMint(address(elytro), 1000 ether);
+
+        _executeERC20Transaction(0.5 ether, false);
+
+        uint256 remaining = dailyLimitHook.getRemainingLimit(address(elytro), address(testLimitToken));
+        assertEq(remaining, 0.5 ether);
+
+        // Try to approve 2 ether (should fail, exceeds daily limit)
+        bytes memory callData = abi.encodeWithSelector(
+            IStandardExecutor.execute.selector,
+            address(testLimitToken),
+            0,
+            abi.encodeWithSelector(IERC20.approve.selector, address(10), 2 ether)
+        );
+
+        PackedUserOperation memory userOperation = UserOperationHelper.newUserOp({
+            sender: address(elytro),
+            nonce: testEntryPoint.getNonce(address(elytro), 0),
+            initCode: "",
+            callData: callData,
+            callGasLimit: 900000,
+            verificationGasLimit: 1000000,
+            preVerificationGas: 300000,
+            maxFeePerGas: 100 gwei,
+            maxPriorityFeePerGas: 100 gwei,
+            paymasterAndData: ""
+        });
+
+        bytes memory hookAndData = returnDummyHookAndData();
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+        userOperation.signature = signUserOp(
+            testEntryPoint, userOperation, walletOwnerPrivateKey, address(elytroDefaultValidator), hookAndData
+        );
+        ops[0] = userOperation;
+
+        // Should revert due to daily limit enforcement
         vm.expectRevert();
         testEntryPoint.handleOps(ops, payable(walletOwner));
     }

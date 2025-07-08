@@ -120,6 +120,7 @@ contract DailyERC20SpendingLimitHook is IHook {
             assembly {
                 spent := mload(add(data, 68)) // 32 + 4 +32
             }
+            token = target;
             return (token, spent);
         } else if (selector == IERC20.transferFrom.selector) {
             // 0x23b872dd   address  address  uint256
