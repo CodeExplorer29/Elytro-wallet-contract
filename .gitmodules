@@ -22,3 +22,4 @@
 [submodule "lib/elytro-wallet-core"]
 	path = lib/elytro-wallet-core
 	url = https://github.com/Elytro-eth/elytro-wallet-core
+	branch = v1.1.0
