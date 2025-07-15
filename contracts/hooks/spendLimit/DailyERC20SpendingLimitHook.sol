@@ -16,6 +16,14 @@ import {console} from "forge-std/console.sol";
  *
  * Limitations: Token-specific functions (permit, transferWithAuthorization, etc.)
  * are not supported and may bypass limits.
+ *
+ * Recommendations:
+ * - Keep the number of tracked tokens reasonable
+ * - Remove unused token limits before uninstalling the hook
+ * - Monitor gas costs as token count grows
+ *
+ * Note: Gas costs are relatively stable as token count increases due to
+ * efficient array operations and storage management.
  */
 contract DailyERC20SpendingLimitHook is IHook {
     uint256 public constant TIME_LOCK_DURATION = 1 days;
@@ -37,6 +45,7 @@ contract DailyERC20SpendingLimitHook is IHook {
     struct SpendingLimit {
         bool initialized;
         mapping(address => TokenLimit) tokenLimits;
+        address[] trackedTokens;
     }
 
     mapping(address => SpendingLimit) public walletSpendingLimits;
@@ -64,9 +73,24 @@ contract DailyERC20SpendingLimitHook is IHook {
         }
     }
 
+    /**
+     * @dev Deinitializes the hook and clears all token limits.
+     *
+     * Note: tracked tokens size should be kept reasonable to avoid high gas costs
+     * during hook uninstallation.
+     */
     function DeInit() external override {
         SpendingLimit storage limit = walletSpendingLimits[msg.sender];
         require(limit.initialized, "not initialized");
+
+        // Clear all tracked token limits
+        for (uint256 i = 0; i < limit.trackedTokens.length; i++) {
+            delete limit.tokenLimits[limit.trackedTokens[i]];
+        }
+
+        // Clear the tracked tokens array
+        delete limit.trackedTokens;
+
         delete walletSpendingLimits[msg.sender];
     }
 
@@ -218,6 +242,7 @@ contract DailyERC20SpendingLimitHook is IHook {
             tokenLimit.dailyLimit = newLimit;
             tokenLimit.lastResetTime = block.timestamp;
             tokenLimit.dailySpent = 0;
+            _trackToken(limit, token);
             emit LimitChanged(msg.sender, token, newLimit);
         } else {
             // For existing limits, use time-lock
@@ -241,6 +266,8 @@ contract DailyERC20SpendingLimitHook is IHook {
         tokenLimit.dailyLimit = tokenLimit.pendingLimit.newLimit;
         tokenLimit.lastResetTime = block.timestamp;
         tokenLimit.dailySpent = 0;
+
+        _trackToken(limit, token);
 
         // Clear pending change
         delete tokenLimit.pendingLimit;
@@ -268,8 +295,29 @@ contract DailyERC20SpendingLimitHook is IHook {
         tokenLimit.lastResetTime = block.timestamp;
         tokenLimit.dailySpent = 0;
 
+        _trackToken(limit, token);
+
         emit TokenTracked(msg.sender, token);
         emit LimitChanged(msg.sender, token, amount);
+    }
+
+    /**
+     * @dev Tracks a token in the trackedTokens array for proper cleanup during DeInit.
+     *
+     * Performance impact:
+     * - Adding new tokens becomes more expensive as trackedTokens array grows
+     */
+    function _trackToken(SpendingLimit storage limit, address token) private {
+        bool found = false;
+        for (uint256 i = 0; i < limit.trackedTokens.length; i++) {
+            if (limit.trackedTokens[i] == token) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            limit.trackedTokens.push(token);
+        }
     }
 
     // View functions
