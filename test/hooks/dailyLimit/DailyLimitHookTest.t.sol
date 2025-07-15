@@ -696,4 +696,31 @@ contract DailyLimitHookTest is Test, UserOpHelper {
         uint256 remaining = dailyLimitHook.getRemainingLimit(address(elytro), address(testLimitToken));
         assertEq(remaining, 0.7 ether, "Remaining limit should be reduced by 0.3 ether");
     }
+
+    function test_deInitClearsAllTokenLimits() public {
+        vm.deal(address(elytro), 1000 ether);
+        testLimitToken.sudoMint(address(elytro), 1000 ether);
+
+        vm.prank(address(elytro));
+        dailyLimitHook.initiateSetLimit(address(testLimitToken), 1 ether);
+        vm.warp(block.timestamp + 1 days + 1);
+        vm.prank(address(elytro));
+        dailyLimitHook.applySetLimit(address(testLimitToken));
+
+        // Verify limits are set
+        uint256 limit1 = dailyLimitHook.getCurrentLimit(address(elytro), address(testLimitToken));
+        assertEq(limit1, 1 ether);
+
+        // DeInit the hook
+        vm.prank(address(elytro));
+        dailyLimitHook.DeInit();
+
+        // Verify limits are cleared
+        uint256 limit1After = dailyLimitHook.getCurrentLimit(address(elytro), address(testLimitToken));
+        assertEq(limit1After, 0);
+
+        // Verify remaining limits return max (no limits set)
+        uint256 remaining1 = dailyLimitHook.getRemainingLimit(address(elytro), address(testLimitToken));
+        assertEq(remaining1, type(uint256).max);
+    }
 }
