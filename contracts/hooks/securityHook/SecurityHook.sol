@@ -28,6 +28,25 @@ contract SecurityHook is IHook, Ownable {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
 
+    // Thrown when the SecurityHook is already initialized.
+    error ALREADY_INITIALIZED();
+    // Thrown when the provided safety delay is invalid.
+    error INVALID_SAFETY_DELAY();
+    // Thrown when deinit is not possible.
+    error CANNOT_DEINIT();
+    // Thrown when the SecurityHook is not initialized.
+    error NOT_INITIALIZED();
+    // Thrown when a force uninstall has already been requested.
+    error FORCE_UNINSTALL_ALREADY_REQUESTED();
+    // Thrown when a force uninstall has not been requested.
+    error FORCE_UNINSTALL_NOT_REQUESTED();
+    // Thrown when the SecurityHook signature is invalid.
+    error INVALID_SECURITYHOOK_SIGNATURE();
+    // Thrown when the safety delay has not passed.
+    error SAFETY_DELAY_NOT_PASSED();
+    // Thrown when the SecurityHook signature is missing.
+    error MISSING_SECURITYHOOK_SIGNATURE();
+
     event signerAdded(address indexed signer);
     event signerRemoved(address indexed signer);
     event forceUninstallRequested(address indexed user, uint64 forceUninstallAfter);
@@ -69,24 +88,34 @@ contract SecurityHook is IHook, Ownable {
 
     function Init(bytes calldata data) external override {
         UserData storage _userData = userData[msg.sender];
-        require(_userData.initialized == false, "SecurityHook: already initialized");
+        if (_userData.initialized) {
+            revert ALREADY_INITIALIZED();
+        }
         _userData.initialized = true;
         _userData.forceUninstallAfter = 0;
         uint32 _safetyDelay = uint32(bytes4(data[:4]));
-        require(_safetyDelay > 0 && _safetyDelay < 365 days, "SecurityHook: invalid safetyDelay");
+        if (_safetyDelay == 0 || _safetyDelay > 365 days) {
+            revert INVALID_SAFETY_DELAY();
+        }
         _userData.safetyDelay = _safetyDelay;
     }
 
     function DeInit() external override {
         UserData storage _userData = userData[msg.sender];
-        require(_userData.initialized == true, "SecurityHook: cannot deinit");
+        if (!_userData.initialized) {
+            revert CANNOT_DEINIT();
+        }
         delete userData[msg.sender];
     }
 
     function forcePreUninstall() external {
         UserData storage _userData = userData[msg.sender];
-        require(_userData.initialized == true, "SecurityHook: not initialized");
-        require(_userData.forceUninstallAfter == 0, "SecurityHook: already requested");
+        if (!_userData.initialized) {
+            revert NOT_INITIALIZED();
+        }
+        if (_userData.forceUninstallAfter != 0) {
+            revert FORCE_UNINSTALL_ALREADY_REQUESTED();
+        }
         uint64 _forceUninstallAfter = uint64(block.timestamp) + uint64(_userData.safetyDelay);
         _userData.forceUninstallAfter = _forceUninstallAfter;
         emit forceUninstallRequested(msg.sender, _forceUninstallAfter);
@@ -98,7 +127,9 @@ contract SecurityHook is IHook, Ownable {
          * there is no need to implement protection against cross-account signature replay attacks in this case.
          */
         address recoveredAddress = hash.toEthSignedMessageHash().recover(hookSignature);
-        require(signers[recoveredAddress], "SecurityHook: invalid signature");
+        if (!signers[recoveredAddress]) {
+            revert INVALID_SECURITYHOOK_SIGNATURE();
+        }
     }
 
     function preUserOpValidationHook(
@@ -111,7 +142,9 @@ contract SecurityHook is IHook, Ownable {
 
         if (hookSignature.length > 0) {
             address recoveredAddress = userOpHash.toEthSignedMessageHash().recover(hookSignature);
-            require(signers[recoveredAddress], "SecurityHook: invalid signature");
+            if (!signers[recoveredAddress]) {
+                revert INVALID_SECURITYHOOK_SIGNATURE();
+            }
             return;
         }
 
@@ -123,12 +156,14 @@ contract SecurityHook is IHook, Ownable {
                     methodId := mload(add(subData, 0x20))
                 }
                 if (target == address(this)) {
+                    // force Uninstall step 1.
                     // only allow to call `function forcePreUninstall() external`;
                     if (methodId == SecurityHook.forcePreUninstall.selector) {
                         // allow execution for forcePreUninstall without signature
                         return;
                     }
                 } else if (target == msg.sender) {
+                    // force Uninstall step 2.
                     // only allow to call `function uninstallHook(address hookAddress) external`;
                     if (methodId == IHookManager.uninstallHook.selector && subData.length == 36) {
                         address hookAddress;
@@ -138,13 +173,16 @@ contract SecurityHook is IHook, Ownable {
                         // only allow if the hookAddress is this contract
                         if (hookAddress == address(this)) {
                             UserData storage _userData = userData[msg.sender];
-                            require(_userData.initialized == true, "SecurityHook: not initialized");
-                            require(_userData.forceUninstallAfter != 0, "SecurityHook: force-uninstall not requested");
+                            if (!_userData.initialized) {
+                                revert NOT_INITIALIZED();
+                            }
+                            if (_userData.forceUninstallAfter == 0) {
+                                revert FORCE_UNINSTALL_NOT_REQUESTED();
+                            }
                             // allow if the force-uninstall waiting time has passed
-                            require(
-                                block.timestamp >= _userData.forceUninstallAfter,
-                                "SecurityHook: safety delay not passed"
-                            );
+                            if (_userData.forceUninstallAfter > block.timestamp) {
+                                revert SAFETY_DELAY_NOT_PASSED();
+                            }
                             // allow execution
                             return;
                         }
@@ -152,6 +190,6 @@ contract SecurityHook is IHook, Ownable {
                 }
             }
         }
-        revert("SecurityHook: missing signature");
+        revert MISSING_SECURITYHOOK_SIGNATURE();
     }
 }
