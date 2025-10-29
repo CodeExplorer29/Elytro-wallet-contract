@@ -93,6 +93,10 @@ contract SecurityHook is IHook, Ownable {
     }
 
     function preIsValidSignatureHook(bytes32 hash, bytes calldata hookSignature) external view override {
+        /**
+         * Because the isValidSignature function in Elytro uses EIP-712 (see `function _encodeRawHash(bytes32 rawHash)`),
+         * there is no need to implement protection against cross-account signature replay attacks in this case.
+         */
         address recoveredAddress = hash.toEthSignedMessageHash().recover(hookSignature);
         require(signers[recoveredAddress], "SecurityHook: invalid signature");
     }
