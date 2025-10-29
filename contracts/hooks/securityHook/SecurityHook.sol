@@ -108,6 +108,19 @@ contract SecurityHook is IHook, Ownable {
         delete userData[msg.sender];
     }
 
+    /**
+     * @dev Initiates the emergency removal process for this hook, acting as an escape hatch.
+     * This function is designed for scenarios where 2FA or other verification methods are unavailable,
+     * preventing the user from being permanently locked out of their wallet.
+     *
+     * It is the first step in a two-step process:
+     * 1. Call `forcePreUninstall()` to begin a time-lock period specified by `safetyDelay`.
+     * 2. After the `safetyDelay` has elapsed, call the wallet's `uninstallHook(address(this))` function
+     *    to forcibly remove this hook.
+     *
+     * The time delay serves as a crucial security measure, providing a window to detect and
+     * respond to any unauthorized removal attempts.
+     */
     function forcePreUninstall() external {
         UserData storage _userData = userData[msg.sender];
         if (!_userData.initialized) {
