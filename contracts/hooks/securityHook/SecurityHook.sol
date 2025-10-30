@@ -4,7 +4,6 @@ pragma solidity ^0.8.28;
 import {IHook, PackedUserOperation} from "@elytro-wallet-core/contracts/interface/IHook.sol";
 import {IStandardExecutor} from "@elytro-wallet-core/contracts/interface/IStandardExecutor.sol";
 import {IHookManager} from "@elytro-wallet-core/contracts/interface/IHookManager.sol";
-import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -26,7 +25,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  */
 contract SecurityHook is IHook, Ownable {
     using ECDSA for bytes32;
-    using MessageHashUtils for bytes32;
 
     // Thrown when the SecurityHook is already initialized.
     error ALREADY_INITIALIZED();
@@ -134,15 +132,25 @@ contract SecurityHook is IHook, Ownable {
         emit forceUninstallRequested(msg.sender, _forceUninstallAfter);
     }
 
-    function preIsValidSignatureHook(bytes32 hash, bytes calldata hookSignature) external view override {
-        /**
-         * Because the isValidSignature function in Elytro uses EIP-712 (see `function _encodeRawHash(bytes32 rawHash)`),
-         * there is no need to implement protection against cross-account signature replay attacks in this case.
-         */
-        address recoveredAddress = hash.toEthSignedMessageHash().recover(hookSignature);
+    /**
+     * @dev There’s no need to use ERC-191 (Ethereum Signed Message) here, for the following reasons:
+     *   1.	The signer is a dedicated address and should not be used for any other purpose.
+     *   2.	When signing, you should never accept an unreadable hash directly — always require users to provide structured, human-readable data, such as PackedUserOperation or EIP-1271 messages in EIP-712 format.
+     *   3.	Since there’s no security risk in this context, avoiding ERC-191 keeps the implementation simpler and more efficient.
+     */
+    function verifySignature(bytes32 hash, bytes calldata hookSignature) private view {
+        address recoveredAddress = hash.recover(hookSignature);
         if (!signers[recoveredAddress]) {
             revert INVALID_SECURITYHOOK_SIGNATURE();
         }
+    }
+
+    function preIsValidSignatureHook(bytes32 hash, bytes calldata hookSignature) external view override {
+        /**
+         * - Because the isValidSignature function in Elytro uses EIP-712 (see `function _encodeRawHash(bytes32 rawHash)`),
+         *   there is no need to implement protection against cross-account signature replay attacks in this case.
+         */
+        verifySignature(hash, hookSignature);
     }
 
     function preUserOpValidationHook(
@@ -154,10 +162,7 @@ contract SecurityHook is IHook, Ownable {
         (missingAccountFunds);
 
         if (hookSignature.length > 0) {
-            address recoveredAddress = userOpHash.toEthSignedMessageHash().recover(hookSignature);
-            if (!signers[recoveredAddress]) {
-                revert INVALID_SECURITYHOOK_SIGNATURE();
-            }
+            verifySignature(userOpHash, hookSignature);
             return;
         }
 
