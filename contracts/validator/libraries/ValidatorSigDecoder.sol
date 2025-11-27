@@ -83,20 +83,6 @@ library ValidatorSigDecoder {
     |                        |                    | +--------+--------+--------+--------+-------------+------------+------------------------+ |
     +------------------------+--------------------+-------------------------------------------------------------------------------------------+
 
-    E: signature type 4: SessionKey sig with Merkle proof
-
-    +--------------------------------------------------------------------------------------+
-    |                                                                                      |
-    |                              SessionKey With MerkleProof.                            |
-    |                                                                                      |
-    +-------------------------------+--------------------------+---------------------------+
-    |         signature type        |      signature data      |       merkleproof         |
-    +-------------------------------+--------------------------+---------------------------+
-    |                               |                          |                           |
-    |            0x04               |         65 bytes.        |     variable length       |
-    |                               |                          |                           |
-    +-------------------------------+--------------------------+---------------------------+
-
      */
 
     function decodeValidatorSignature(bytes calldata validatorSignature)
@@ -123,10 +109,6 @@ library ValidatorSigDecoder {
             require(validatorSignature.length >= 161, "invalid validator signature length");
             validationData = uint256(bytes32(validatorSignature[1:33]));
             signature = validatorSignature[33:];
-        } else if (signatureType == 0x4) {
-            require(validatorSignature.length >= 66, "invalid validator signature length");
-            validationData = 0;
-            signature = validatorSignature[1:];
         } else {
             revert("invalid validator signature type");
         }
