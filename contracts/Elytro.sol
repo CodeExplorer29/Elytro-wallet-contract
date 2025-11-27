@@ -38,7 +38,7 @@ contract Elytro is
     ERC1271Handler
 {
     // entrypoint v0.8 support
-    string public constant VERSION = "1.1.1";
+    string public constant VERSION = "1.1.2";
     address internal immutable _DEFAULT_VALIDATOR;
 
     constructor(address _entryPoint, address defaultValidator) EntryPointManager(_entryPoint) {
