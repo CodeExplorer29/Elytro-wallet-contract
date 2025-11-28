@@ -45,7 +45,18 @@ contract SessionKeyValidator is IValidator {
     // key: walletAddress, value: SessionKeyInfo. [Associated storage]
     mapping(address => SessionKeyInfo) public sessionKeys;
 
-    function setSessionKey(address sessionKey, uint32 validUntil, bytes32 merkleRoot) external {
+    function Init(bytes calldata args) external override {
+        if (args.length != 0) {
+            (address sessionKey, uint32 validUntil, bytes32 merkleRoot) = abi.decode(args, (address, uint32, bytes32));
+            setSessionKey(sessionKey, validUntil, merkleRoot);
+        }
+    }
+
+    function DeInit() external override {
+        setSessionKey(address(0), 0, bytes32(0));
+    }
+
+    function setSessionKey(address sessionKey, uint32 validUntil, bytes32 merkleRoot) public {
         address walletAddress = msg.sender;
         SessionKeyInfo storage sessionKeyInfo = sessionKeys[walletAddress];
         sessionKeyInfo.validUntil = validUntil;
@@ -61,6 +72,7 @@ contract SessionKeyValidator is IValidator {
         returns (uint256 validationData)
     {
         (address recoveredAddr, ECDSA.RecoverError error,) = ECDSA.tryRecover(userOpHash, validatorSignature[0:65]);
+
         if (error != ECDSA.RecoverError.NoError) {
             return SIG_VALIDATION_FAILED;
         }
@@ -84,7 +96,6 @@ contract SessionKeyValidator is IValidator {
         bool[] memory proofFlags;
         bytes32[] memory leaves;
         (proof, proofFlags, leaves) = abi.decode(sessionKeyData, (bytes32[], bool[], bytes32[]));
-
         bytes32[] memory leavesHash = new bytes32[](leaves.length);
         for (uint256 i = 0; i < leaves.length; i++) {
             leavesHash[i] = keccak256(abi.encodePacked(leaves[i]));
@@ -98,7 +109,6 @@ contract SessionKeyValidator is IValidator {
         if (MerkleProof.multiProofVerify(proof, proofFlags, merkleRoot, leavesHash) == false) {
             return false;
         }
-
         bytes4 selector = bytes4(userOp.callData);
 
         if (IStandardExecutor.execute.selector == selector) {
@@ -120,6 +130,8 @@ contract SessionKeyValidator is IValidator {
                     return false;
                 }
             }
+        } else {
+            return false;
         }
         return true;
     }
@@ -228,8 +240,4 @@ contract SessionKeyValidator is IValidator {
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return interfaceId == type(IValidator).interfaceId;
     }
-
-    function Init(bytes calldata) external override {}
-
-    function DeInit() external override {}
 }
