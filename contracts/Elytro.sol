@@ -5,7 +5,7 @@ import {IAccount, PackedUserOperation} from "@elytro-wallet-core/contracts/inter
 import {EntryPointManager} from "@elytro-wallet-core/contracts/base/EntryPointManager.sol";
 import {FallbackManager} from "@elytro-wallet-core/contracts/base/FallbackManager.sol";
 import {StandardExecutor} from "@elytro-wallet-core/contracts/base/StandardExecutor.sol";
-import {ValidatorManager} from "@elytro-wallet-core/contracts/base/ValidatorManager.sol";
+import {ElytroValidatorManager} from "./abstract/ElytroValidatorManager.sol";
 import {SignatureDecoder} from "@elytro-wallet-core/contracts/utils/SignatureDecoder.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {Errors} from "./libraries/Errors.sol";
@@ -32,13 +32,13 @@ contract Elytro is
     ElytroModuleManager,
     ElytroHookManager,
     StandardExecutor,
-    ValidatorManager,
+    ElytroValidatorManager,
     FallbackManager,
     ElytroUpgradeManager,
     ERC1271Handler
 {
     // entrypoint v0.8 support
-    string public constant VERSION = "1.1.1";
+    string public constant VERSION = "1.1.2";
     address internal immutable _DEFAULT_VALIDATOR;
 
     constructor(address _entryPoint, address defaultValidator) EntryPointManager(_entryPoint) {
