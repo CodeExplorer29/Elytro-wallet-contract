@@ -65,8 +65,6 @@ library ValidatorSigDecoder {
     |                        | +--------+--------+--------+--------+-----------------+------------+----------------+ |
     +------------------------+----------------------------------------------------------------------------------------+
 
-     D: signature type 3: passkey sig without validation data
-    D: signature type 3: passkey sig with validation data
     D: signature type 3: passkey sig with validation data
     +-------------------------------------------------------------------------------------------------------------------------------+
     |                                                                                                                               |
